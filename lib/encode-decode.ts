@@ -1,50 +1,52 @@
-const SHIFT = 8;
+const ARG_SHIFT = 8;
 const TYPE_MASK        = 0b0000000011111111;
 const OPERAND_LEN_MASK = 0b0000111100000000;
-const LO_BIT_MASK      = 0b00000000000000001111111111111111;
-const HI_BIT_MASK      = 0b11111111111111110000000000000000;
-const MAX = 0b1111111111111111;
+const MAX_SIZE         = 0b1111111111111111;
+const TYPE_SIZE        = 0b11111111;
+
 export class Encoder {
-  static encode(program: number[], format = 'hex'): string | number[] {
+  static encode(program: number[]): string {
     let encoder = new this(program);
-    return encoder.encode(format);
+    let buffer = encoder.encode();
+    return encoder.toHex(buffer);
+  }
+
+  static encodeToBuffer(program: number[]) {
+    let encoder = new this(program);
+    return encoder.encode();
   }
 
   constructor(private program: number[]) {}
 
-  encode(format: string): string | number[] {
+  encode(): number[] {
     let { program } = this;
     let encoded = [];
     for (let i = 0; i < program.length; i += 4) {
       let type = program[i];
-      if (type > 0b11111111) {
+      if (type > TYPE_SIZE) {
         throw new Error(`Opcode type over 8-bits. Got ${type}.`);
       }
       let op1 = program[i + 1];
       let op2 = program[i + 2];
       let op3 = program[i + 3];
 
-      if (op1 > MAX || op2 > MAX || op3 > MAX) {
+      if (op1 > MAX_SIZE || op2 > MAX_SIZE || op3 > MAX_SIZE) {
         throw new Error(`Operand is over 16-bits.`);
       }
 
       let argsLength = this.getOperationLength(op1, op2, op3);
-      encoded.push((type | (argsLength << SHIFT)));
+      encoded.push((type | (argsLength << ARG_SHIFT)));
       this.encodeOperands(encoded, argsLength, op1, op2, op3);
-    }
-
-    if (format === 'hex') {
-      return this.toHex(encoded);
     }
 
     return encoded;
   }
 
-  toHex(encoded) {
+  toHex(encoded: number[]): string {
     return String.fromCharCode.apply(null, new Uint16Array(encoded));
   }
 
-  encodeOperands(encoded, argsLength, op1, op2, op3) {
+  encodeOperands(encoded: number[], argsLength: number, op1: number, op2: number, op3: number) {
     switch(argsLength) {
       case 1:
         encoded.push(op1);
@@ -61,7 +63,7 @@ export class Encoder {
     }
   }
 
-  getOperationLength(op1, op2, op3) {
+  getOperationLength(op1: number, op2: number, op3: number) {
     let length = 0;
 
     if (op1 !== 0) {
@@ -85,7 +87,7 @@ export class Decoder {
     return new this().decode(hexString);
   }
 
-  str2ab(str): Uint16Array {
+  str2ab(str: string): Uint16Array {
     let buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
     let bufView = new Uint16Array(buf);
     for (let i = 0, strLen = str.length; i < strLen; i++) {
@@ -102,7 +104,7 @@ export class Decoder {
     for (let i = 0; i < hexString.length; i++) {
       let instruction = hexString.charCodeAt(i);
       let type = (instruction & TYPE_MASK);
-      let argsLength = (instruction & OPERAND_LEN_MASK) >> SHIFT;
+      let argsLength = (instruction & OPERAND_LEN_MASK) >> ARG_SHIFT;
 
       program[i] = type;
 
