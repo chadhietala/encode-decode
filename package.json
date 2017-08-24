@@ -3,9 +3,8 @@
     "typescript": "^2.4.2"
   },
   "scripts": {
-    "start": "tsc --module 'AMD' --outFile 'dist/encode-decode.js' lib/encode-decode.ts",
-    "build": "tsc --module 'CommonJS' --outDir dist lib/*.ts",
-    "test": "yarn build && qunit dist/test.js"
+    "build": "tsc --module 'AMD' --outFile 'dist/encode-decode.js' lib/encode-decode.ts",
+    "test": "tsc --module 'CommonJS' --outDir dist lib/*.ts && qunit dist/test.js"
   },
   "devDependencies": {
     "qunitjs": "^2.4.0"
