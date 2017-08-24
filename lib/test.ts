@@ -117,10 +117,68 @@ QUnit.test('lo bit type | lo bit operand | lo bit operand | lo bit operand', (as
   assert.equal(encoded.charCodeAt(3), 1);
 });
 
-QUnit.test('high bit type | high bit operand | high bit operand | high bit operand', (assert) => {
+QUnit.test('hi bit type | hi bit operand | hi bit operand | hi bit operand', (assert) => {
   let encoded = Encoder.encode([255, 65535, 65535, 65535]) as string;
   assert.equal(encoded.charCodeAt(0), 1023);
   assert.equal(encoded.charCodeAt(1), 65535);
   assert.equal(encoded.charCodeAt(2), 65535);
   assert.equal(encoded.charCodeAt(3), 65535);
+});
+
+QUnit.module('Decoder Test');
+
+QUnit.test('lo bit type', (assert) => {
+  let encoded = Encoder.encode([1, 0, 0, 0]) as string;
+  let decoded = Decoder.decode(encoded);
+  assert.equal(decoded.byteLength, 2)
+  assert.deepEqual(decoded, new Uint16Array([1]));
+});
+
+QUnit.test('hi bit type', (assert) => {
+  let encoded = Encoder.encode([255, 0, 0, 0]) as string;
+  let decoded = Decoder.decode(encoded);
+  assert.equal(decoded.byteLength, 2)
+  assert.deepEqual(decoded, new Uint16Array([255]));
+});
+
+QUnit.test('lo bit type | lo bit operand', (assert) => {
+  let encoded = Encoder.encode([1, 1, 0, 0]) as string;
+  let decoded = Decoder.decode(encoded);
+  assert.equal(decoded.byteLength, 4)
+  assert.deepEqual(decoded, new Uint16Array([1, 1]));
+});
+
+QUnit.test('hi bit type | hi bit operand', (assert) => {
+  let encoded = Encoder.encode([255, 65535, 0, 0]) as string;
+  let decoded = Decoder.decode(encoded);
+  assert.equal(decoded.byteLength, 4)
+  assert.deepEqual(decoded, new Uint16Array([255, 65535]));
+});
+
+QUnit.test('lo bit type | lo bit operand | lo bit operand', (assert) => {
+  let encoded = Encoder.encode([1, 1, 1, 0]) as string;
+  let decoded = Decoder.decode(encoded);
+  assert.equal(decoded.byteLength, 6)
+  assert.deepEqual(decoded, new Uint16Array([1, 1, 1]));
+});
+
+QUnit.test('hi bit type | hi bit operand | hi bit operand', (assert) => {
+  let encoded = Encoder.encode([255, 65535, 65535, 0]) as string;
+  let decoded = Decoder.decode(encoded);
+  assert.equal(decoded.byteLength, 6)
+  assert.deepEqual(decoded, new Uint16Array([255, 65535, 65535]));
+});
+
+QUnit.test('lo bit type | lo bit operand | lo bit operand | lo bit operand', (assert) => {
+  let encoded = Encoder.encode([1, 1, 1, 1]) as string;
+  let decoded = Decoder.decode(encoded);
+  assert.equal(decoded.byteLength, 8)
+  assert.deepEqual(decoded, new Uint16Array([1, 1, 1, 1]));
+});
+
+QUnit.test('hi bit type | hi bit operand | hi bit operand | hi bit operand', (assert) => {
+  let encoded = Encoder.encode([255, 65535, 65535, 65535]) as string;
+  let decoded = Decoder.decode(encoded);
+  assert.equal(decoded.byteLength, 8)
+  assert.deepEqual(decoded, new Uint16Array([255, 65535, 65535, 65535]));
 });

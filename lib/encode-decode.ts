@@ -85,45 +85,47 @@ export class Decoder {
     return new this().decode(hexString);
   }
 
-  str2ab(str) {
+  str2ab(str): Uint16Array {
     let buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
     let bufView = new Uint16Array(buf);
     for (let i = 0, strLen = str.length; i < strLen; i++) {
       bufView[i] = str.charCodeAt(i);
     }
+
     return bufView;
   }
 
   decode(hexString: string): Uint16Array {
-    let program = this.str2ab(hexString);
+    let buffer = new ArrayBuffer(hexString.length * 2); // 2 bytes for each char
+    let program = new Uint16Array(buffer);
 
-    let pc = 0;
-    while (pc !== program.length - 1) {
-      let instruction = program[pc];
+    for (let i = 0; i < hexString.length; i++) {
+      let instruction = hexString.charCodeAt(i);
       let type = (instruction & TYPE_MASK);
-      program[pc] = type;
       let argsLength = (instruction & OPERAND_LEN_MASK) >> SHIFT;
 
+      program[i] = type;
+
       if (argsLength === 0) {
-        pc++;
+        // Nothing to do
       }
 
       if (argsLength === 1) {
-        program[pc + 1] = program[pc + 1];
-        pc += 2;
+        program[i + 1] = hexString.charCodeAt(i + 1);
+        i += 1;
       }
 
       if (argsLength === 2) {
-        program[pc + 1] = program[pc + 1];
-        program[pc + 2] = (program[pc + 1] & HI_BIT_MASK) >> SHIFT;
-        pc += 2;
+        program[i + 1] = hexString.charCodeAt(i + 1);
+        program[i + 2] = hexString.charCodeAt(i + 2);
+        i += 2;
       }
 
       if (argsLength === 3) {
-        program[pc + 1] = program[pc + 1];
-        program[pc + 2] = (program[pc + 1] & HI_BIT_MASK) >> SHIFT;
-        program[pc + 3] = program[pc + 2];
-        pc += 3;
+        program[i + 1] = hexString.charCodeAt(i + 1);
+        program[i + 2] = hexString.charCodeAt(i + 2);
+        program[i + 3] = hexString.charCodeAt(i + 3);
+        i += 3;
       }
     }
 
