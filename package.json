@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "typescript": "^2.4.2"
+  },
+  "scripts": {
+    "build": "tsc --module 'CommonJS' --outDir dist lib/*.ts",
+    "test": "yarn build && qunit dist/test.js"
+  },
+  "devDependencies": {
+    "qunitjs": "^2.4.0"
+  }
+}
