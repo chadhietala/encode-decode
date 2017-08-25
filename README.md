@@ -26,9 +26,3 @@ First 16-Bit Integer is reserved for the opcode type a flag to indicate the numb
 | 4-bits |  4-bits  | 8-bits |
 
 Depending on the op size there will be 0 - 3 operands that follow of which are 16-bit integrers.
-
-
-```
-
-00000000XXXXXXXX
-```
